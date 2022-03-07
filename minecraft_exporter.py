@@ -220,7 +220,8 @@ class MinecraftCollector(object):
         damage_taken = Metric('damage_taken', "Damage Taken by Player", "counter")
         damage_dealt = Metric('damage_dealt', "Damage dealt by Player", "counter")
         blocks_crafted = Metric('blocks_crafted', "Items a Player crafted", "counter")
-        player_playtime = Metric('player_playtime', "Time in Minutes a Player was online", "counter")
+        player_playtime = Metric('player_playtime', "Time in Ticks (Minutes for pre 1.17 versions) a Player was online",
+                                 "counter")
         player_advancements = Metric('player_advancements', "Number of completed advances of a player", "counter")
         player_slept = Metric('player_slept', "Times a Player slept in a bed", "counter")
         player_quests_finished = Metric('player_quests_finished', 'Number of quests a Player has finished', 'counter')
@@ -322,11 +323,11 @@ class MinecraftCollector(object):
                 elif stat == "minecraft:damage_taken":
                     damage_taken.add_sample('damage_taken', value=value, labels={'player': name})
                 elif stat == "minecraft:damage_dealt":
-                    damage_dealt.add_sample('damage_dealt',value=value,labels={'player':name})
+                    damage_dealt.add_sample('damage_dealt', value=value, labels={'player': name})
                 elif stat == "minecraft:play_time":
-                    player_playtime.add_sample('player_playtime',value=value,labels={'player':name})
-                elif stat == "minecraft:play_one_minute": # pre 1.17
-                    player_playtime.add_sample('player_playtime',value=value,labels={'player':name})
+                    player_playtime.add_sample('player_playtime', value=value, labels={'player': name})
+                elif stat == "minecraft:play_one_minute":  # pre 1.17
+                    player_playtime.add_sample('player_playtime', value=value, labels={'player': name})
                 elif stat == "minecraft:walk_one_cm":
                     cm_traveled.add_sample("cm_traveled", value=value, labels={'player': name, 'method': "walking"})
                 elif stat == "minecraft:walk_on_water_one_cm":
@@ -371,15 +372,13 @@ class MinecraftCollector(object):
 
 
 if __name__ == '__main__':
-    try:
-        HTTP_PORT = int(os.environ.get('HTTP_PORT'))
-    except:
-        HTTP_PORT = 8000
+    http_port = int(os.environ.get('HTTP_PORT', "8000"))
 
-    start_http_server(HTTP_PORT)
-    REGISTRY.register(MinecraftCollector())
+    start_http_server(http_port)
+    collector = MinecraftCollector()
+    REGISTRY.register(collector)
 
-    print(f'Exporter started on Port {HTTP_PORT}')
+    print(f'Exporter started on Port {http_port}')
 
     while True:
         try:
